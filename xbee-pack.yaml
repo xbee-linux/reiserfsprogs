@@ -1,0 +1,43 @@
+schema-version: 1.0
+
+type: builder
+
+description: |
+  Le paquet reiserfsprogs contient divers outils à utiliser avec le système de fichiers Reiser.
+  Programmes installés: debugreiserfs, mkreiserfs, reiserfsck, reiserfstune et resize_reiserfs
+  Bibliothèque installée: libreiserfscore.so
+  Répertoire installé: /usr/include/reiserfs
+  Descriptions courtes
+    debugreiserfs: peut parfois aider à résoudre des problèmes avec des systèmes de fichiers ReiserFS. Si on l'appelle sans options, il affiche les superblocs de chaque système de fichiers ReiserFS qui se trouve sur le périphérique
+    mkreiserfs: crée un système de fichiers ReiserFS
+    reiserfsck: est utilisé pour vérifier et corriger un système de fichiers ReiserFS
+    reiserfstune: est utilisé pour personnaliser le journal de ReiserFS. ATTENTION : N'utilisez pas cet outil sans avoir lu attentivement d'abord la page de manuel
+    resize_reiserfs: est utilisé pour redimensionner un système de fichiers ReiserFS démonté
+
+in:
+  version: 3.6.27
+
+dependencies:
+  - autoconf
+  - automake
+  - m4
+  - libtool
+  - util-linux
+  - e2fsprogs
+  - acl
+
+provision:
+  - url:
+      from:  https://www.kernel.org/pub/linux/kernel/people/jeffm/reiserfsprogs/v{% version %}/reiserfsprogs-{% version %}.tar.xz
+      todir: "{% xbeeSrc %}"
+
+build:
+  - shell:
+      cmds:
+        - sed -i '/parse_time.h/i \#define _GNU_SOURCE' lib/parse_time.c
+        - autoreconf -fiv
+        - ./configure --prefix=/usr
+        - make
+        - make install DESTDIR={% xbeeOut %}
+      directory: "{% xbeeSrc %}/reiserfsprogs-{% version %}"
+
